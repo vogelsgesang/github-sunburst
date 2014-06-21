@@ -21,8 +21,8 @@
     </div>
     <div ng-show="status == 'ready'">
       <form>
-        <label><input type="radio" ng-model="valueDimension" value="size">File size</label>
-        <label><input type="radio" ng-model="valueDimension" value="count">Count</label>
+        <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="size">File size</label>
+        <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="count">Count</label>
       </form>
       <sunburst hierarchy="extractedTree" value-function="valueFunction"></sunburst>
     </div>
