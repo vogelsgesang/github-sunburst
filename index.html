@@ -20,7 +20,11 @@
       An error occurred. Have a look at the WebDeveloper console.
     </div>
     <div ng-show="status == 'ready'">
-      <sunburst hierarchy="extractedTree"></sunburst>
+      <form>
+        <label><input type="radio" ng-model="valueDimension" value="size">Size</label>
+        <label><input type="radio" ng-model="valueDimension" value="count">Count</label>
+      </form>
+      <sunburst hierarchy="extractedTree" value-function="valueFunction"></sunburst>
     </div>
   </div>
 </body>

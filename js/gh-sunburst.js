@@ -10,8 +10,18 @@ angular.module("gh.sunburst", ['uri-templates'])
 .controller("ghSunburstController", function($scope, $http, $q, $window, uriTemplate, githubHeaders, githubUrls) {
   $scope.repository = {
     owner: "vogelsgesang",
-    repo: "jsonview"
+    repo: "upc-od"
   };
+
+  $scope.valueDimension = "count";
+  $scope.$watch("valueDimension", function(dim) {
+    if(dim == "size") {
+      $scope.valueFunction = function(d) {return d.size;}
+    } else {
+      $scope.valueFunction = function(d) {return 1;}
+    }
+  })
+
   var reloadTree = $scope.reloadTree = function reloadTree() {
     $scope.status = "loading"
     loadTree($scope.repository.owner, $scope.repository.repo)
@@ -78,6 +88,7 @@ angular.module("gh.sunburst", ['uri-templates'])
     restrict: "E",
     scope: {
       hierarchy: "=",
+      valueFunction: "="
     },
     link: function(scope, element, attrs) {
       //read the initial width
@@ -100,13 +111,27 @@ angular.module("gh.sunburst", ['uri-templates'])
       scope.$watch("width", function() {
         redraw();
       });
+      scope.$watch("valueFunction", function(newValueFunction) {
+        console.log(newValueFunction);
+        if(newValueFunction) {
+          partition.value(newValueFunction);
+        } else {
+          partition.value(function(d) {return 1;});
+        }
+        redraw();
+      });
 
       //create the d3 instances which are reused
-      var colorScale = d3.scale.category20b();
+      var colorScale = d3.scale.category20();
       var partition = d3.layout.partition()
         .sort(null)
         .size([1, 1])
         .value(function(d) { return 1; });
+      var arc = d3.svg.arc()
+        .startAngle(function(d) { return d.x; })
+        .endAngle(function(d) { return d.x + d.dx; })
+        .innerRadius(function(d) { return Math.sqrt(d.y); })
+        .outerRadius(function(d) { return Math.sqrt(d.y + d.dy); });
       //create the SVG skeleton
       var svg = d3.select(element[0])
         .append("svg")
@@ -117,21 +142,23 @@ angular.module("gh.sunburst", ['uri-templates'])
         //adjust the basic layout
         var width = scope.width;
         var height = width;
-        partition.size([width, height]);
+        var radius = width/2;
+        partition.size([2*Math.PI, radius*radius]);
         svg.style("height", height+"px");
-        //mainGroup.attr("transform", "translate(" + width/2 + "," + height/2 + ")");
+        mainGroup.attr("transform", "translate(" + radius + "," + radius + ")");
         if(hierarchyCopy) {
-          mainGroup.selectAll("*").remove();
-          var path = mainGroup.datum(hierarchyCopy).selectAll("rect")
+          var path = mainGroup.datum(hierarchyCopy).selectAll("path")
               .data(partition.nodes);
-          path.exit().remove();
-          path.enter().append("rect")
-              .attr("x", _.property("x"))
-              .attr("y", _.property("y"))
-              .attr("width", _.property("dx"))
-              .attr("height", _.property("dy"))
-              .style("fill", function(d) {return colorScale(d.path)})
+          //ENTER
+          path.enter().append("path")
+          //UPDATE + ENTER
+          path.attr("d", arc)
+              .attr("d", arc)
+              .style("fill", function(d) {return colorScale(d.path);})
+              .style("display", function(d) {return d.parent ? "block":"none";})
               .attr("title", _.property("path"));
+          //EXIT
+          path.exit().remove();
         } else {
           mainGroup.selectAll("*").remove();
         }
