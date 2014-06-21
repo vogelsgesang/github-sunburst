@@ -138,6 +138,7 @@ angular.module("gh.sunburst", ['uri-templates'])
           .style("width", "100%");
       var mainGroup = svg.append("g");
       
+      //redraws the chart
       function redraw() {
         //adjust the basic layout
         var width = scope.width;
@@ -149,8 +150,13 @@ angular.module("gh.sunburst", ['uri-templates'])
         if(hierarchyCopy) {
           var path = mainGroup.datum(hierarchyCopy).selectAll("path")
               .data(partition.nodes);
+          //UPDATE
+          path.transition()
+            .duration(1000)
+            .attrTween("d", arcTween);
           //ENTER
           path.enter().append("path")
+            .each(storeForTransition);
           //UPDATE + ENTER
           path.attr("d", arc)
               .attr("d", arc)
@@ -163,7 +169,21 @@ angular.module("gh.sunburst", ['uri-templates'])
           mainGroup.selectAll("*").remove();
         }
       }
-
+      //saves the values for the transition
+      function storeForTransition(d) {
+        d._x = d.x;
+        d._dx = d.dx;
+      }
+      // Interpolate the arcs in data space.
+      function arcTween(d) {
+        var interpolate = d3.interpolate({x: d._x, dx: d._dx}, d);
+        return function(t) {
+          var b = interpolate(t);
+          d._x = b.x;
+          d._dx = b.dx;
+          return arc(b);
+        };
+      }
     }
   }
 });
