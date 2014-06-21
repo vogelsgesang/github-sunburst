@@ -42,41 +42,45 @@ angular.module("d3charts.sunburst", [])
         .append("svg")
           .attr("viewBox", "-1, -1, 2, 2")
           .attr("preserveAspectRatio", "xMinYMin meet")
+      var backgroundCircle = svg
+        .append("circle")
+          .attr({cx:0, cy:0, r:1})
+          .style("fill", "transparent")
+          .on("mouseleave", mouseleave);
       var mainGroup = svg.append("g");
       
       //redraws the chart
       function redraw() {
         //adjust the basic layout
+        console.log(hierarchyCopy);
         if(hierarchyCopy) {
           var segmentsData = partition.nodes(hierarchyCopy);
           var segments = mainGroup.datum(hierarchyCopy).selectAll("path")
               .data(_.filter(segmentsData, function(d) {return !!d.parent;}));
-          //UPDATE
-          segments.transition()
-            .duration(1000)
-            .attrTween("d", arcTween);
           //ENTER
           segments.enter().append("path")
-            .each(storeForTransition)
-            .attr("d", arc);
+            .attr("d", arc)
+            .on("mouseenter", mouseenter)
           //UPDATE + ENTER
           segments
-              .style("fill", function(d) {return colorScale(d.path);})
-              .style("display", function(d) {return d.parent ? "block":"none";})
-              .attr("title", _.property("path"));
+            .style("fill", function(d) {return colorScale(d.path);})
+            .style("display", function(d) {return d.parent ? "block":"none";})
+            .attr("title", _.property("path"))
+            .transition()
+              .duration(1000)
+              .attrTween("d", arcTween);
           //EXIT
           segments.exit().remove();
         } else {
           mainGroup.selectAll("path").remove();
         }
       }
-      //saves the values for the transition
-      function storeForTransition(d) {
-        d._x = d.x;
-        d._dx = d.dx;
-      }
       // Interpolate the arcs in data space.
       function arcTween(d) {
+        if(d._x === undefined || d._dx === undefined) {
+          d._x = d.x;
+          d._dx = 0;
+        }
         var interpolate = d3.interpolate({x: d._x, dx: d._dx}, d);
         return function(t) {
           var b = interpolate(t);
@@ -84,6 +88,12 @@ angular.module("d3charts.sunburst", [])
           d._dx = b.dx;
           return arc(b);
         };
+      }
+      //for tracking the currently hovered element
+      function mouseenter(d) {
+      }
+      function mouseleave() {
+        console.log("mouseleave");
       }
     }
   }
