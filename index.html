@@ -25,7 +25,8 @@
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="size">File size</label>
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="count">Count</label>
       </form>
-      <sunburst hierarchy="extractedTree" value-function="valueFunction"></sunburst>
+      {{hoveredElement.path ? hoveredElement.path : "nothing hovered"}}
+      <sunburst hierarchy="extractedTree" value-function="valueFunction" hovered-element="hoveredElement"></sunburst>
     </div>
   </div>
 </body>

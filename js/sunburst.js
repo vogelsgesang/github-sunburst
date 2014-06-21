@@ -1,6 +1,6 @@
 "use strict";
 angular.module("d3charts.sunburst", [])
-.directive("sunburst", function($window) {
+.directive("sunburst", function($parse) {
   return {
     restrict: "E",
     scope: {
@@ -8,6 +8,11 @@ angular.module("d3charts.sunburst", [])
       valueFunction: "="
     },
     link: function(scope, element, attrs) {
+      if(attrs.hasOwnProperty("hoveredElement")) {
+        var hoveredElementGet = $parse(attrs.hoveredElement);
+        var hoveredElementSet = hoveredElementGet.assign;
+        hoveredElementSet(scope.$parent, {b: 2});
+      }
       //watch the variables and adjust chart if necessary
       scope.$watch("hierarchy", function(newHierarchy) {
         redraw();
@@ -37,12 +42,8 @@ angular.module("d3charts.sunburst", [])
         .append("svg")
           .attr("viewBox", "-1, -1, 2, 2")
           .attr("preserveAspectRatio", "xMinYMin meet")
-      var backgroundCircle = svg
-        .append("circle")
-          .attr({cx:0, cy:0, r:1})
-          .style("fill", "transparent")
+      var mainGroup = svg.append("g")
           .on("mouseleave", mouseleave);
-      var mainGroup = svg.append("g");
       
       //redraws the chart
       function redraw() {
@@ -85,8 +86,12 @@ angular.module("d3charts.sunburst", [])
       }
       //for tracking the currently hovered element
       function mouseenter(d) {
+        hoveredElementSet(scope.$parent, d);
+        scope.$parent.$digest();
       }
       function mouseleave() {
+        hoveredElementSet(scope.$parent, undefined);
+        scope.$parent.$digest();
       }
     }
   }
