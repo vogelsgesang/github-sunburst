@@ -2,6 +2,7 @@
 <html><head>
   <meta charset="utf8">
   <script src="js/libs/lodash.min.js" defer></script>
+  <script src="js/libs/d3.v3.js" defer></script>
   <script src="js/libs/angular.min.js" defer></script>
   <script src="js/uri-templates.js" defer></script>
   <script src="js/gh-sunburst.js" defer></script>
@@ -14,5 +15,7 @@
     Head Commit: <pre>{{headCommit | json}}</pre>
     Tree: <pre>{{tree | json}}</pre>
     Extracted Tree: <pre>{{extractedTree | json}}</pre>
+    Visualization:<br>
+    <sunburst hierarchy="extractedTree"></sunburst>
   </div>
 </body>
