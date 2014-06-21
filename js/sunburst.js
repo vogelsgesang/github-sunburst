@@ -30,7 +30,7 @@ angular.module("d3charts.sunburst", [])
       var colorScale = d3.scale.category20();
       var partition = d3.layout.partition()
         .sort(null)
-        .size([1, 1])
+        .size([2*Math.PI, 1])
         .value(function(d) { return 1; });
       var arc = d3.svg.arc()
         .startAngle(function(d) { return d.x; })
@@ -47,7 +47,6 @@ angular.module("d3charts.sunburst", [])
       //redraws the chart
       function redraw() {
         //adjust the basic layout
-        partition.size([2*Math.PI, 1]);;
         if(hierarchyCopy) {
           var segmentsData = partition.nodes(hierarchyCopy);
           var segments = mainGroup.datum(hierarchyCopy).selectAll("path")
@@ -58,10 +57,10 @@ angular.module("d3charts.sunburst", [])
             .attrTween("d", arcTween);
           //ENTER
           segments.enter().append("path")
-            .each(storeForTransition);
+            .each(storeForTransition)
+            .attr("d", arc);
           //UPDATE + ENTER
-          segments.attr("d", arc)
-              .attr("d", arc)
+          segments
               .style("fill", function(d) {return colorScale(d.path);})
               .style("display", function(d) {return d.parent ? "block":"none";})
               .attr("title", _.property("path"));
