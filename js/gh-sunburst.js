@@ -20,7 +20,6 @@ angular.module("gh.sunburst", ['uri-templates'])
         $scope.extractedTree = tree;
       })
       .then(null, function(e) {
-        $window.alert("An error occured! The error was logged to the console.");
         $scope.status = "error";
         console.log(e);
       });
@@ -81,13 +80,13 @@ angular.module("gh.sunburst", ['uri-templates'])
       hierarchy: "=",
     },
     link: function(scope, element, attrs) {
+      //read the initial width
+      scope.width = element[0].offsetWidth;
       //listen for resize events
       $window.addEventListener("resize", function() {
         scope.width = element[0].offsetWidth;
         scope.$apply();
       });
-      //read the initial width
-      scope.width = element[0].offsetWidth;
 
       //we need to keep a copy of the tree since d3.layout.partion modifies the
       //the tree (adds some properties) and I do not want to expose these
@@ -96,6 +95,9 @@ angular.module("gh.sunburst", ['uri-templates'])
       //watch the variables and redraw chart if necessary
       scope.$watch("hierarchy", function(newHierarchy) {
         hierarchyCopy = _.cloneDeep(scope.hierarchy);
+        redraw();
+      });
+      scope.$watch("width", function() {
         redraw();
       });
 
@@ -113,16 +115,17 @@ angular.module("gh.sunburst", ['uri-templates'])
       
       function redraw() {
         //adjust the basic layout
-        console.log("redraw");
         var width = scope.width;
         var height = width;
         partition.size([width, height]);
         svg.style("height", height+"px");
         //mainGroup.attr("transform", "translate(" + width/2 + "," + height/2 + ")");
         if(hierarchyCopy) {
-          var path = mainGroup.datum(hierarchyCopy).selectAll("path")
-              .data(partition.nodes)
-            .enter().append("rect")
+          mainGroup.selectAll("*").remove();
+          var path = mainGroup.datum(hierarchyCopy).selectAll("rect")
+              .data(partition.nodes);
+          path.exit().remove();
+          path.enter().append("rect")
               .attr("x", _.property("x"))
               .attr("y", _.property("y"))
               .attr("width", _.property("dx"))
