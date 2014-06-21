@@ -16,7 +16,6 @@ angular.module("gh.sunburst", ['uri-templates'])
     .then(function(response) {
       var repositoryData = response.data;
       $scope.repository.data = repositoryData;
-      console.log(uriTemplate(repositoryData.git_refs_url).fillFromObject({sha: "heads/"+repositoryData.default_branch}));
       return $http.get(uriTemplate(repositoryData.git_refs_url).fillFromObject({sha: "heads/"+repositoryData.default_branch}));
     })
     .then(function(response) {
@@ -36,7 +35,31 @@ angular.module("gh.sunburst", ['uri-templates'])
     .then(function(response) {
       var tree = response.data;
       $scope.tree = tree;
+      return tree;
+    })
+    .then(function(ghTree) {
+      $scope.extractedTree = extractTree(ghTree.tree);
     })
     .then(null,console.log);
+  function extractTree(ghTree) {
+    function extractSubtree(children) {
+      var children = _.groupBy(children, function(child) {return child.path.substr(0, child.path.indexOf("/"))});
+      var directChildren = children[""];
+      delete children[""];
+      children = _.map(children, function(subtree, path) {
+        var children = _.map(subtree, function(c) {
+          c.path = c.path.substr(c.path.indexOf("/")+1);
+          return c;
+        });
+        return {
+          name: path,
+          children: extractSubtree(children)
+        };
+      });
+      children = children.concat(directChildren);
+      return children;
+    };
+    var blobs = _.where(ghTree, {type: "blob"});
+    return extractSubtree(blobs);
+  }
 });
-
