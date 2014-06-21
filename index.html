@@ -8,7 +8,7 @@
   <script src="js/gh-sunburst.js" defer></script>
   <link rel="stylesheet" href="css/style.css">
 </head><body ng-app="gh.sunburst">
-  <div ng-controller="ghSunburstController" class="content">
+  <div ng-controller="ghSunburstController" class="content ng-cloak">
     <form ng-submit="reloadTree()">
       URL: <input ng-model="repository.owner">/<input ng-model="repository.repo">
       <button type="submit">Reload</button>
