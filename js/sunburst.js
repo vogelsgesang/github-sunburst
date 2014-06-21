@@ -8,13 +8,8 @@ angular.module("d3charts.sunburst", [])
       valueFunction: "="
     },
     link: function(scope, element, attrs) {
-      //we need to keep a copy of the tree since d3.layout.partion modifies the
-      //the tree (adds some properties) and I do not want to expose these
-      //changes to the user of this directive.
-      var hierarchyCopy = _.cloneDeep(scope.hierarchy);
       //watch the variables and adjust chart if necessary
       scope.$watch("hierarchy", function(newHierarchy) {
-        hierarchyCopy = _.cloneDeep(scope.hierarchy);
         redraw();
       });
       scope.$watch("valueFunction", function(newValueFunction) {
@@ -52,10 +47,9 @@ angular.module("d3charts.sunburst", [])
       //redraws the chart
       function redraw() {
         //adjust the basic layout
-        console.log(hierarchyCopy);
-        if(hierarchyCopy) {
-          var segmentsData = partition.nodes(hierarchyCopy);
-          var segments = mainGroup.datum(hierarchyCopy).selectAll("path")
+        if(scope.hierarchy) {
+          var segmentsData = partition.nodes(scope.hierarchy);
+          var segments = mainGroup.datum(scope.hierarchy).selectAll("path")
               .data(_.filter(segmentsData, function(d) {return !!d.parent;}));
           //ENTER
           segments.enter().append("path")
@@ -75,7 +69,7 @@ angular.module("d3charts.sunburst", [])
           mainGroup.selectAll("path").remove();
         }
       }
-      // Interpolate the arcs in data space.
+      //Interpolate the arcs in data space.
       function arcTween(d) {
         if(d._x === undefined || d._dx === undefined) {
           d._x = d.x;
@@ -93,7 +87,6 @@ angular.module("d3charts.sunburst", [])
       function mouseenter(d) {
       }
       function mouseleave() {
-        console.log("mouseleave");
       }
     }
   }
