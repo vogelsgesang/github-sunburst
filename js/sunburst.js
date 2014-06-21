@@ -8,28 +8,16 @@ angular.module("d3charts.sunburst", [])
       valueFunction: "="
     },
     link: function(scope, element, attrs) {
-      //read the initial width
-      scope.width = element[0].offsetWidth;
-      //listen for resize events
-      $window.addEventListener("resize", function() {
-        scope.width = element[0].offsetWidth;
-        scope.$apply();
-      });
-
       //we need to keep a copy of the tree since d3.layout.partion modifies the
       //the tree (adds some properties) and I do not want to expose these
       //changes to the user of this directive.
       var hierarchyCopy = _.cloneDeep(scope.hierarchy);
-      //watch the variables and redraw chart if necessary
+      //watch the variables and adjust chart if necessary
       scope.$watch("hierarchy", function(newHierarchy) {
         hierarchyCopy = _.cloneDeep(scope.hierarchy);
         redraw();
       });
-      scope.$watch("width", function() {
-        redraw();
-      });
       scope.$watch("valueFunction", function(newValueFunction) {
-        console.log(newValueFunction);
         if(newValueFunction) {
           partition.value(newValueFunction);
         } else {
@@ -52,38 +40,35 @@ angular.module("d3charts.sunburst", [])
       //create the SVG skeleton
       var svg = d3.select(element[0])
         .append("svg")
-          .style("width", "100%");
+          .attr("viewBox", "-1, -1, 2, 2")
+          .attr("preserveAspectRatio", "xMinYMin meet")
       var mainGroup = svg.append("g");
       
       //redraws the chart
       function redraw() {
         //adjust the basic layout
-        var width = scope.width;
-        var height = width;
-        var radius = width/2;
-        partition.size([2*Math.PI, radius*radius]);
-        svg.style("height", height+"px");
-        mainGroup.attr("transform", "translate(" + radius + "," + radius + ")");
+        partition.size([2*Math.PI, 1]);;
         if(hierarchyCopy) {
-          var path = mainGroup.datum(hierarchyCopy).selectAll("path")
-              .data(partition.nodes);
+          var segmentsData = partition.nodes(hierarchyCopy);
+          var segments = mainGroup.datum(hierarchyCopy).selectAll("path")
+              .data(_.filter(segmentsData, function(d) {return !!d.parent;}));
           //UPDATE
-          path.transition()
+          segments.transition()
             .duration(1000)
             .attrTween("d", arcTween);
           //ENTER
-          path.enter().append("path")
+          segments.enter().append("path")
             .each(storeForTransition);
           //UPDATE + ENTER
-          path.attr("d", arc)
+          segments.attr("d", arc)
               .attr("d", arc)
               .style("fill", function(d) {return colorScale(d.path);})
               .style("display", function(d) {return d.parent ? "block":"none";})
               .attr("title", _.property("path"));
           //EXIT
-          path.exit().remove();
+          segments.exit().remove();
         } else {
-          mainGroup.selectAll("*").remove();
+          mainGroup.selectAll("path").remove();
         }
       }
       //saves the values for the transition
