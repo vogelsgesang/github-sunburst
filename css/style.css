@@ -1,6 +1,10 @@
-sunburst {
+.content {
   display: block;
   width: 40em;
   max-width: 100%;
   margin: auto;
+}
+
+sunburst {
+  display: block;
 }
