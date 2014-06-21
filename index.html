@@ -9,7 +9,16 @@
   <link rel="stylesheet" href="css/style.css">
 </head><body ng-app="gh.sunburst">
   <div ng-controller="ghSunburstController">
-    URL: {{repository.owner}}/{{repository.repo}}
-    <sunburst hierarchy="extractedTree"></sunburst>
+    URL: <input ng-model="repository.owner">/<input ng-model="repository.repo">
+    <button ng-click="reloadTree()">Reload</button>
+    <div ng-show="status == 'loading'">
+      Loading...
+    </div>
+    <div ng-show="status == 'error'">
+      An error occurred
+    </div>
+    <div ng-show="status == 'ready'">
+      <sunburst hierarchy="extractedTree"></sunburst>
+    </div>
   </div>
 </body>

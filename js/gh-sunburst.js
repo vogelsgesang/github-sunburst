@@ -12,58 +12,66 @@ angular.module("gh.sunburst", ['uri-templates'])
     owner: "vogelsgesang",
     repo: "jsonview"
   };
-  $http.get(uriTemplate(githubUrls.repository_url).fillFromObject($scope.repository))
-    .then(function(response) {
-      var repositoryData = response.data;
-      return $http.get(uriTemplate(repositoryData.git_refs_url).fillFromObject({sha: "heads/"+repositoryData.default_branch}));
-    })
-    .then(function(response) {
-      var headRef = response.data;
-      if(headRef.object.type == "commit") {
-        return $http.get(headRef.object.url);
-      } else {
-        return $q.reject(new Error("ref does not reference a commit"));
-      }
-    })
-    .then(function(response) {
-      var commit = response.data;
-      return $http.get(commit.tree.url, {params: {recursive: 1}});
-    })
-    .then(function(response) {
-      var tree = response.data;
-      return tree;
-    })
-    .then(function(ghTree) {
-      $scope.extractedTree = extractTree(ghTree.tree);
-    })
-    .then(null, function(e) {
-      $window.alert("An error occured! The error was logged to the console.");
-      console.log(e);
-    });
-  function extractTree(ghTree) {
-    function extractSubtree(children) {
-      var children = _.groupBy(children, function(child) {return child.path.substr(0, child.path.indexOf("/"))});
-      var directChildren = children[""] !== undefined ? children[""] : [];
-      delete children[""];
-      children = _.map(children, function(subtree, path) {
-        var children = _.map(subtree, function(c) {
-          c.path = c.path.substr(c.path.indexOf("/")+1);
-          return c;
-        });
-        return {
-          path: path,
-          children: extractSubtree(children)
-        };
+  var reloadTree = $scope.reloadTree = function reloadTree() {
+    $scope.status = "loading"
+    loadTree($scope.repository.owner, $scope.repository.repo)
+      .then(function(tree) {
+        $scope.status = "ready";
+        $scope.extractedTree = tree;
+      })
+      .then(null, function(e) {
+        $window.alert("An error occured! The error was logged to the console.");
+        $scope.status = "error";
+        console.log(e);
       });
-      children = children.concat(directChildren);
-      return children;
-    };
-    var blobs = _.where(ghTree, {type: "blob"});
-    var tree = extractSubtree(blobs);
-    return {
-      path: "/",
-      children: tree
-    };
+  }
+  reloadTree();
+  function loadTree(owner, repo) {
+    return $http.get(uriTemplate(githubUrls.repository_url).fillFromObject({owner:owner, repo:repo}))
+      .then(function(response) {
+        var repositoryData = response.data;
+        return $http.get(uriTemplate(repositoryData.git_refs_url).fillFromObject({sha: "heads/"+repositoryData.default_branch}));
+      })
+      .then(function(response) {
+        var headRef = response.data;
+        if(headRef.object.type == "commit") {
+          return $http.get(headRef.object.url);
+        } else {
+          return $q.reject(new Error("ref does not reference a commit"));
+        }
+      })
+      .then(function(response) {
+        var commit = response.data;
+        return $http.get(commit.tree.url, {params: {recursive: 1}});
+      })
+      .then(function(response) {
+        return extractTree(response.data.tree);
+      });
+    function extractTree(ghTree) {
+      function extractSubtree(children) {
+        var children = _.groupBy(children, function(child) {return child.path.substr(0, child.path.indexOf("/"))});
+        var directChildren = children[""] !== undefined ? children[""] : [];
+        delete children[""];
+        children = _.map(children, function(subtree, path) {
+          var children = _.map(subtree, function(c) {
+            c.path = c.path.substr(c.path.indexOf("/")+1);
+            return c;
+          });
+          return {
+            path: path,
+            children: extractSubtree(children)
+          };
+        });
+        children = children.concat(directChildren);
+        return children;
+      };
+      var blobs = _.where(ghTree, {type: "blob"});
+      var tree = extractSubtree(blobs);
+      return {
+        path: "/",
+        children: tree
+      };
+    }
   }
 })
 .directive("sunburst", function($window) {
@@ -111,15 +119,19 @@ angular.module("gh.sunburst", ['uri-templates'])
         partition.size([width, height]);
         svg.style("height", height+"px");
         //mainGroup.attr("transform", "translate(" + width/2 + "," + height/2 + ")");
-        var path = mainGroup.datum(hierarchyCopy).selectAll("path")
-            .data(partition.nodes)
-          .enter().append("rect")
-            .attr("x", _.property("x"))
-            .attr("y", _.property("y"))
-            .attr("width", _.property("dx"))
-            .attr("height", _.property("dy"))
-            .style("fill", function(d) {return colorScale(d.path)})
-            .attr("title", _.property("path"));
+        if(hierarchyCopy) {
+          var path = mainGroup.datum(hierarchyCopy).selectAll("path")
+              .data(partition.nodes)
+            .enter().append("rect")
+              .attr("x", _.property("x"))
+              .attr("y", _.property("y"))
+              .attr("width", _.property("dx"))
+              .attr("height", _.property("dy"))
+              .style("fill", function(d) {return colorScale(d.path)})
+              .attr("title", _.property("path"));
+        } else {
+          mainGroup.selectAll("*").remove();
+        }
       }
 
     }
