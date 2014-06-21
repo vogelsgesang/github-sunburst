@@ -7,7 +7,7 @@ angular.module("gh.sunburst", ['uri-templates'])
 .constant("githubUrls", {
   repository_url: "https://api.github.com/repos/{owner}/{repo}"
 })
-.controller("ghSunburstController", function($scope, $http, $q, uriTemplate, githubHeaders, githubUrls) {
+.controller("ghSunburstController", function($scope, $http, $q, $window, uriTemplate, githubHeaders, githubUrls) {
   $scope.repository = {
     owner: "vogelsgesang",
     repo: "jsonview"
@@ -15,12 +15,10 @@ angular.module("gh.sunburst", ['uri-templates'])
   $http.get(uriTemplate(githubUrls.repository_url).fillFromObject($scope.repository))
     .then(function(response) {
       var repositoryData = response.data;
-      $scope.repository.data = repositoryData;
       return $http.get(uriTemplate(repositoryData.git_refs_url).fillFromObject({sha: "heads/"+repositoryData.default_branch}));
     })
     .then(function(response) {
       var headRef = response.data;
-      $scope.headRef = headRef;
       if(headRef.object.type == "commit") {
         return $http.get(headRef.object.url);
       } else {
@@ -29,18 +27,19 @@ angular.module("gh.sunburst", ['uri-templates'])
     })
     .then(function(response) {
       var commit = response.data;
-      $scope.headCommit = commit;
       return $http.get(commit.tree.url, {params: {recursive: 1}});
     })
     .then(function(response) {
       var tree = response.data;
-      $scope.tree = tree;
       return tree;
     })
     .then(function(ghTree) {
       $scope.extractedTree = extractTree(ghTree.tree);
     })
-    .then(null,console.log);
+    .then(null, function(e) {
+      $window.alert("An error occured! The error was logged to the console.");
+      console.log(e);
+    });
   function extractTree(ghTree) {
     function extractSubtree(children) {
       var children = _.groupBy(children, function(child) {return child.path.substr(0, child.path.indexOf("/"))});

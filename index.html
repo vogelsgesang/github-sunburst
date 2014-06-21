@@ -10,12 +10,6 @@
 </head><body ng-app="gh.sunburst">
   <div ng-controller="ghSunburstController">
     URL: {{repository.owner}}/{{repository.repo}}
-    Repository: <pre>{{repository.data | json}}</pre>
-    Head: <pre>{{headRef | json}}</pre>
-    Head Commit: <pre>{{headCommit | json}}</pre>
-    Tree: <pre>{{tree | json}}</pre>
-    Extracted Tree: <pre>{{extractedTree | json}}</pre>
-    Visualization:<br>
     <sunburst hierarchy="extractedTree"></sunburst>
   </div>
 </body>
