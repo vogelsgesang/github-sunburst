@@ -8,3 +8,7 @@
 sunburst {
   display: block;
 }
+
+sunburst .backgroundCircle {
+  fill: transparent;
+}

@@ -8,10 +8,13 @@ angular.module("d3charts.sunburst", [])
       valueFunction: "="
     },
     link: function(scope, element, attrs) {
+      //handle the hoverElement attribute
       if(attrs.hasOwnProperty("hoveredElement")) {
         var hoveredElementGet = $parse(attrs.hoveredElement);
         var hoveredElementSet = hoveredElementGet.assign;
-        hoveredElementSet(scope.$parent, {b: 2});
+        if(!hoveredElementSet) {
+          throw new Error("hoveredElement is un-assignable");
+        }
       }
       //watch the variables and adjust chart if necessary
       scope.$watch("hierarchy", function(newHierarchy) {
@@ -30,7 +33,7 @@ angular.module("d3charts.sunburst", [])
       var colorScale = d3.scale.category20();
       var partition = d3.layout.partition()
         .sort(null)
-        .size([2*Math.PI, 1])
+        .size([2*Math.PI, 100*100])
         .value(function(d) { return 1; });
       var arc = d3.svg.arc()
         .startAngle(function(d) { return d.x; })
@@ -40,10 +43,20 @@ angular.module("d3charts.sunburst", [])
       //create the SVG skeleton
       var svg = d3.select(element[0])
         .append("svg")
-          .attr("viewBox", "-1, -1, 2, 2")
+          .attr("viewBox", "-100, -100, 200, 200")
           .attr("preserveAspectRatio", "xMinYMin meet")
       var mainGroup = svg.append("g")
-          .on("mouseleave", mouseleave);
+      mainGroup.append("circle")
+        .attr("r", 100)
+        .classed("backgroundCircle", true);
+      //attach a mouseleave listener if hoveredElement is used
+      if(hoveredElementSet) {
+        mainGroup.on("mouseleave", mouseleave);
+        //we must attach to the svg as well, since we could leave the mainGroup
+        //over one of the edges of the svg and in this case mousleave would not fire
+        //on the mainGroup
+        svg.on("mouseleave", mouseleave);
+      }
       
       //redraws the chart
       function redraw() {
@@ -53,14 +66,15 @@ angular.module("d3charts.sunburst", [])
           var segments = mainGroup.datum(scope.hierarchy).selectAll("path")
               .data(_.filter(segmentsData, function(d) {return !!d.parent;}));
           //ENTER
-          segments.enter().append("path")
-            .attr("d", arc)
-            .on("mouseenter", mouseenter)
+          var entered = segments.enter().append("path")
+            .attr("d", arc);
+          if(hoveredElementSet) {
+            entered.on("mouseenter", mouseenter)
+          }
           //UPDATE + ENTER
           segments
             .style("fill", function(d) {return colorScale(d.path);})
             .style("display", function(d) {return d.parent ? "block":"none";})
-            .attr("title", _.property("path"))
             .transition()
               .duration(1000)
               .attrTween("d", arcTween);
