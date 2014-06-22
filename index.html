@@ -20,7 +20,7 @@
     <div ng-show="status == 'error'">
       An error occurred. Have a look at the WebDeveloper console.
     </div>
-    <div ng-show="status == 'ready'">
+    <div>
       <ul class="pathWidget" ng-class="{fileSelected: hoveredElement.type == 'blob'}">
         <li></li><li ng-repeat="pathFragment in hoveredElement.path">
           {{pathFragment}}

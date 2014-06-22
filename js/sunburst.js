@@ -67,9 +67,8 @@ angular.module("d3charts.sunburst", [])
               .data(_.filter(segmentsData, function(d) {return !!d.parent;}));
           //ENTER
           var entered = segments.enter().append("path")
-            .attr("d", arc);
           if(hoveredElementSet) {
-            entered.on("mouseenter", mouseenter)
+            entered.on("mouseenter", mouseenter);
           }
           //UPDATE + ENTER
           segments
@@ -86,15 +85,17 @@ angular.module("d3charts.sunburst", [])
       }
       //Interpolate the arcs in data space.
       function arcTween(d) {
-        if(d._x === undefined || d._dx === undefined) {
-          d._x = d.x;
-          d._dx = 0;
+        //the previous animation state is stored on the DOM element (this)
+        var domElement = this;
+        if(domElement._x === undefined || domElement._dx === undefined) {
+          domElement._x = d.x;
+          domElement._dx = 0;
         }
-        var interpolate = d3.interpolate({x: d._x, dx: d._dx}, d);
+        var interpolate = d3.interpolate({x: domElement._x, dx: domElement._dx}, d);
         return function(t) {
           var b = interpolate(t);
-          d._x = b.x;
-          d._dx = b.dx;
+          domElement._x = b.x;
+          domElement._dx = b.dx;
           return arc(b);
         };
       }
