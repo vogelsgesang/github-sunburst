@@ -56,29 +56,49 @@ angular.module("gh.sunburst", ["uri-templates", "d3charts.sunburst"])
         return extractTree(response.data.tree);
       });
     function extractTree(ghTree) {
-      function extractSubtree(children) {
-        var children = _.groupBy(children, function(child) {return child.path.substr(0, child.path.indexOf("/"))});
-        var directChildren = children[""] !== undefined ? children[""] : [];
-        delete children[""];
-        children = _.map(children, function(subtree, path) {
-          var children = _.map(subtree, function(c) {
-            c.path = c.path.substr(c.path.indexOf("/")+1);
-            return c;
-          });
-          return {
-            path: path,
-            children: extractSubtree(children)
-          };
+      //extracts a subtree from a set of children
+      function extractSubtree(children, subtreePath) {
+        //the own tree has an empty path
+        var ownTree = _.find(children, {path: ""});
+        if(ownTree) {
+          _.pull(children, ownTree);
+        } else {
+          ownTree = {};
+        }
+        //group by the directory of files
+        //the "tree"s are grouped into the corresponding directory
+        //(this is the reason for this ternary expression)
+        var subtrees = _.groupBy(children, function(child) {
+          var i = child.path.indexOf("/");
+          return i < 0 && child.type=="tree" ? child.path : child.path.substr(0, i);
         });
-        children = children.concat(directChildren);
-        return children;
+        //handle the direct children
+        var directChildren = subtrees[""] !== undefined ? subtrees[""] : [];
+        _.forEach(directChildren, function(child) {
+          child.name = child.path;
+          child.path = subtreePath.concat(child.name);
+        });
+        delete subtrees[""];
+        //now, handle the subfolders
+        subtrees = _.map(subtrees, function(subtree, pathFragment) {
+          //build the subpath
+          var subPath = subtreePath.concat([pathFragment])
+          //remove the pathFragment form the path of all children
+          _.forEach(subtree, function(c) {
+            c.path = c.path.substr(pathFragment.length+1);
+          });
+          //extract the subTree
+          return extractSubtree(subtree, subPath);
+        });
+        //finally, return this level of the tree
+        return _.assign(ownTree, {
+          path: subtreePath,
+          name: subtreePath[subtreePath.length-1],
+          children: subtrees.concat(directChildren)
+        });
       };
-      var blobs = _.where(ghTree, {type: "blob"});
-      var tree = extractSubtree(blobs);
-      return {
-        path: "/",
-        children: tree
-      };
+      //the cloneDeep is necessary in order to avoid modifying the passed in ghTree
+      return extractSubtree(_.cloneDeep(ghTree), ['/']);
     }
   }
 });

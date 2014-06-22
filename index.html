@@ -25,7 +25,10 @@
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="size">File size</label>
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="count">Count</label>
       </form>
-      {{hoveredElement.path ? hoveredElement.path : "nothing hovered"}}
+      path: {{hoveredElement ? (hoveredElement.path | json) : "nothing hovered"}}<br>
+      name: {{hoveredElement ? (hoveredElement.name | json) : "nothing hovered"}}<br>
+      sha: {{hoveredElement ? (hoveredElement.sha | json) : "nothing hovered"}}<br>
+      type: {{hoveredElement ? (hoveredElement.type | json) : "nothing hovered"}}<br>
       <sunburst hierarchy="extractedTree" value-function="valueFunction" hovered-element="hoveredElement"></sunburst>
     </div>
   </div>
