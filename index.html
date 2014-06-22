@@ -21,15 +21,21 @@
       An error occurred. Have a look at the WebDeveloper console.
     </div>
     <div ng-show="status == 'ready'">
+      <ul class="pathWidget" ng-class="{fileSelected: hoveredElement.type == 'blob'}">
+        <li></li><li ng-repeat="pathFragment in hoveredElement.path">
+          {{pathFragment}}
+        </li>
+      </ul>
       <form>
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="size">File size</label>
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="count">Count</label>
       </form>
-      path: {{hoveredElement ? (hoveredElement.path | json) : "nothing hovered"}}<br>
-      name: {{hoveredElement ? (hoveredElement.name | json) : "nothing hovered"}}<br>
-      sha: {{hoveredElement ? (hoveredElement.sha | json) : "nothing hovered"}}<br>
-      type: {{hoveredElement ? (hoveredElement.type | json) : "nothing hovered"}}<br>
       <sunburst hierarchy="extractedTree" value-function="valueFunction" hovered-element="hoveredElement"></sunburst>
+      <div class="objectDetails">
+        name: {{hoveredElement ? (hoveredElement.name | json) : "nothing hovered"}}<br>
+        sha: {{hoveredElement ? (hoveredElement.sha | json) : "nothing hovered"}}<br>
+        type: {{hoveredElement ? (hoveredElement.type | json) : "nothing hovered"}}<br>
+      </div>
     </div>
   </div>
 </body>

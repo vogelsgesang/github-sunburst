@@ -1,3 +1,11 @@
+sunburst {
+  display: block;
+}
+
+sunburst .backgroundCircle {
+  fill: transparent;
+}
+
 .content {
   display: block;
   width: 50em;
@@ -5,10 +13,61 @@
   margin: auto;
 }
 
-sunburst {
-  display: block;
+.objectDetails {
+  max-width: 35em;
+  background: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 1em;
+  margin: auto;
 }
 
-sunburst .backgroundCircle {
-  fill: transparent;
+.pathWidget {
+  margin: 1em 0;
+  padding:0;
+  display: block;
+  list-style: none;
+}
+
+.pathWidget li {
+  vertical-align: middle;
+  display: inline-block;
+  position:relative;
+  margin-right: 1.1em;
+  height: 1.2em;
+  padding: 1em 1em 1em 1em;
+  background: #ddd;
+}
+
+.pathWidget li:after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 100%;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 1em solid #ddd;
+  border-top: 1.6em solid transparent;
+  border-bottom: 1.6em solid transparent;
+}
+
+.pathWidget li:before {
+  content: "";
+  display: block;
+  position: absolute;
+  right: 100%;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-left: 1em solid transparent;
+  border-top: 1.6em solid #ddd;
+  border-bottom: 1.6em solid #ddd;
+}
+
+.pathWidget li:first-child:before {
+  display:none;
+}
+
+.pathWidget.fileSelected li:last-child:after {
+  display:none;
 }

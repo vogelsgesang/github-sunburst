@@ -98,7 +98,7 @@ angular.module("gh.sunburst", ["uri-templates", "d3charts.sunburst"])
         });
       };
       //the cloneDeep is necessary in order to avoid modifying the passed in ghTree
-      return extractSubtree(_.cloneDeep(ghTree), ['/']);
+      return extractSubtree(_.cloneDeep(ghTree), []);
     }
   }
 });
