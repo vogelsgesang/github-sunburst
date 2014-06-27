@@ -6,9 +6,19 @@
   <script src="js/libs/angular.min.js" defer></script>
   <script src="js/uri-templates.js" defer></script>
   <script src="js/sunburst.js" defer></script>
+  <script>
+    if(document.location.hash == "#mock") {
+      window.mock = true;
+      document.write('<'+'script src="js/libs/angular-mocks.js" defer><'+'/script>');
+      document.write('<'+'script src="js/mocks.js" defer><'+'/script>');
+    }
+  </script>
   <script src="js/gh-sunburst.js" defer></script>
   <link rel="stylesheet" href="css/style.css">
-</head><body ng-app="gh.sunburst">
+</head>
+<script>
+document.write('<body ng-app="gh.sunburst' + (window.mock?'.mock':'') +'">');
+</script>
   <div ng-controller="ghSunburstController" class="content ng-cloak">
     <form ng-submit="reloadTree()">
       URL: <input ng-model="repository.owner">/<input ng-model="repository.repo">
