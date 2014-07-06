@@ -41,7 +41,7 @@ document.write('<body ng-app="gh.sunburst' + (window.mock?'.mock':'') +'">');
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="size">File size</label>
         <label><input type="radio" ng-model="valueDimension" name="valueDimension" value="count">Count</label>
       </form>
-      <sunburst hierarchy="extractedTree" value-function="valueFunction" hovered-element="hoveredElement"></sunburst>
+      <sunburst hierarchy="extractedTree" value-function="valueFunction" key-function="keyFunction" hovered-element="hoveredElement"></sunburst>
       <div class="objectDetails">
         name: {{hoveredElement ? (hoveredElement.name | json) : "nothing hovered"}}<br>
         sha: {{hoveredElement ? (hoveredElement.sha | json) : "nothing hovered"}}<br>

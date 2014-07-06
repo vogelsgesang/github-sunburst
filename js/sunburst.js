@@ -5,7 +5,8 @@ angular.module("d3charts.sunburst", [])
     restrict: "E",
     scope: {
       hierarchy: "=",
-      valueFunction: "="
+      valueFunction: "=",
+      keyFunction: "="
     },
     link: function(scope, element, attrs) {
       //handle the hoverElement attribute
@@ -17,18 +18,26 @@ angular.module("d3charts.sunburst", [])
         }
       }
       //watch the variables and adjust chart if necessary
-      var hierarchyCopy;
+      var hierarchyCopy = undefined;
       scope.$watch("hierarchy", function(newHierarchy) {
         hierarchyCopy = _.cloneDeep(newHierarchy);
         redraw();
       }, true);
       scope.$watch("valueFunction", function(newValueFunction) {
-        if(newValueFunction) {
+        if(newValueFunction && newValueFunction instanceof Function) {
           partition.value(newValueFunction);
         } else {
           partition.value(function(d) {return 1;});
         }
         redraw();
+      });
+      var keyFunction = undefined;
+      scope.$watch("keyFunction", function(newKeyFunction) {
+        if(newKeyFunction && newKeyFunction instanceof Function) {
+          keyFunction = newKeyFunction;
+        } else {
+          keyFunction = undefined;
+        }
       });
 
       //create the d3 instances which are reused
@@ -66,7 +75,7 @@ angular.module("d3charts.sunburst", [])
         if(hierarchyCopy) {
           var segmentsData = partition.nodes(hierarchyCopy);
           var segments = mainGroup.datum(hierarchyCopy).selectAll("path")
-              .data(_.filter(segmentsData, function(d) {return !!d.parent;}));
+              .data(_.filter(segmentsData, function(d) {return !!d.parent;}), keyFunction);
           //ENTER
           var entered = segments.enter().append("path")
           if(hoveredElementSet) {

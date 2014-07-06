@@ -15,7 +15,8 @@ angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
     } else {
       $scope.valueFunction = function(d) {return 1;}
     }
-  })
+  });
+  $scope.keyFunction = function(d) {return d.sha;}
 
   var reloadTree = $scope.reloadTree = function reloadTree() {
     $scope.status = "loading"
