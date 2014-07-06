@@ -17,9 +17,11 @@ angular.module("d3charts.sunburst", [])
         }
       }
       //watch the variables and adjust chart if necessary
+      var hierarchyCopy;
       scope.$watch("hierarchy", function(newHierarchy) {
+        hierarchyCopy = _.cloneDeep(newHierarchy);
         redraw();
-      });
+      }, true);
       scope.$watch("valueFunction", function(newValueFunction) {
         if(newValueFunction) {
           partition.value(newValueFunction);
@@ -61,9 +63,9 @@ angular.module("d3charts.sunburst", [])
       //redraws the chart
       function redraw() {
         //adjust the basic layout
-        if(scope.hierarchy) {
-          var segmentsData = partition.nodes(scope.hierarchy);
-          var segments = mainGroup.datum(scope.hierarchy).selectAll("path")
+        if(hierarchyCopy) {
+          var segmentsData = partition.nodes(hierarchyCopy);
+          var segments = mainGroup.datum(hierarchyCopy).selectAll("path")
               .data(_.filter(segmentsData, function(d) {return !!d.parent;}));
           //ENTER
           var entered = segments.enter().append("path")
