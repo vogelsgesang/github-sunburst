@@ -3,7 +3,7 @@ angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
 .config(function(githubApiProvider) {
   githubApiProvider.userAgent = "vogelsgesang";
 })
-.controller("ghSunburstController", function($scope, $http, $q, $window, githubApi) {
+.controller("ghSunburstController", function($scope, githubApi) {
   $scope.repository = {
     owner: "vogelsgesang",
     repo: "upc-od"
@@ -19,8 +19,15 @@ angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
   $scope.keyFunction = function(d) {return d.sha;}
 
   var reloadTree = $scope.reloadTree = function reloadTree() {
-    $scope.status = "loading"
-    githubApi.loadTree($scope.repository.owner, $scope.repository.repo)
+    $scope.status = "loading";
+    githubApi.getRepository($scope.repository.owner, $scope.repository.repo)
+      .then(function(response) {
+        var branch = response.data.default_branch;
+        return githubApi.getBranch($scope.repository.owner, $scope.repository.repo, branch);
+      }).then(function(response) {
+        var sha = response.data.commit.sha;
+        return githubApi.getCompleteTree($scope.repository.owner, $scope.repository.repo, sha)
+      })
       .then(function(tree) {
         $scope.status = "ready";
         $scope.extractedTree = tree;
@@ -29,6 +36,6 @@ angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
         $scope.status = "error";
         console.log(e);
       });
-  }
+  };
   reloadTree();
 });
