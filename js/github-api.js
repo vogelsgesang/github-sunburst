@@ -114,6 +114,11 @@
     this.getTree = createQueryFunction("tree", ["owner", "repo", "sha"]);
     //returns a complete tree as a nice tree structure
     this.getCompleteTree = function(owner, repo, sha, params) {
+      if(arguments.length < 3) {
+        return $q.reject(new Error(
+          "tried to call getCompleteTree with insufficient arguments."
+        ));
+      }
       if(params === undefined) params = {};
       params.recursive = 1;
       return this.getTree(owner, repo, sha, params)
