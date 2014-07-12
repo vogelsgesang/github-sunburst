@@ -64,7 +64,10 @@
     //this function send a GET request with the necessary headers and returns the promise
     //after applying decoratePromiseForPagination to it
     function sendGetQuery(url) {
-      return decoratePromiseForPagination($http.get(url, {headers:headers}));
+      return decoratePromiseForPagination($http.get(url, {headers:headers}))
+        .then(function(res) {
+          return res.data;
+        });
     }
     //decorates the result with functions for using the pagination mechanism of Github
     function decoratePromiseForPagination(p) {
@@ -123,7 +126,7 @@
       params.recursive = 1;
       return this.getTree(owner, repo, sha, params)
         .then(function(response) {
-          return extractTree(response.data.tree);
+          return extractTree(response.tree);
         });
     } //getCompleteTree
     //extracts a nice tree structure from the github response
