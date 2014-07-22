@@ -4,6 +4,10 @@ angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
   githubApiProvider.userAgent = "vogelsgesang";
 })
 .controller("ghSunburstController", function($scope, $q, githubApi) {
+  window.scope = $scope;
+
+
+  //loads the basic informations and the branches for a repository
   function changeRepository(newOwner, newRepo) {
     $scope.status = "loading";
     $scope.repository = {
@@ -24,12 +28,33 @@ angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
         console.log(e);
       });
   }
-  changeRepository("vogelsgesang", "jsonview");
+  $scope.newOwner = "vogelsgesang";
+  $scope.newRepo = "github-sunburst";
+  changeRepository($scope.newOwner, $scope.newRepo);
+  $scope.changeRepository = changeRepository;
 
+  //load the corresponding commits when the selected branch is changed
   $scope.$watch("repository.selectedBranch", function(newBranch) {
     if(newBranch !== undefined) {
       $scope.status = "loading";
-      var sha = newBranch.commit.sha;
+      return githubApi.listCommits($scope.repository.owner, $scope.repository.repo, {sha: newBranch.commit.sha})
+        .then(function(commits) {
+          $scope.repository.commits = commits;
+          $scope.repository.selectedCommit = $scope.repository.commits[0];
+          $scope.status = "ready";
+        })
+        .catch(function(e) {
+          $scope.status = "error";
+          console.log(e);
+        });
+    }
+  });
+
+  //reloads the tree associated with the currently selected sha
+  $scope.$watch("repository.selectedCommit", function(selectedCommit) {
+    if(selectedCommit !== undefined) {
+      $scope.status = "loading";
+      var sha = selectedCommit.sha;
       return githubApi.getCompleteTree($scope.repository.owner, $scope.repository.repo, sha)
         .then(function(tree) {
           $scope.extractedTree = tree;
@@ -39,6 +64,8 @@ angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
           $scope.status = "error";
           console.log(e);
         });
+    } else {
+      $scope.extractedTree = {}
     }
   });
 

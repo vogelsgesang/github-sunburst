@@ -21,16 +21,15 @@
 document.write('<body ng-app="gh.sunburst' + (window.mock?'.mock':'') +'">');
 </script>
   <div ng-controller="ghSunburstController" class="content ng-cloak">
-    <form ng-submit="reloadTree()">
-      URL: <input ng-model="repository.owner" required>/<input ng-model="repository.repo" required>
+    <form ng-submit="changeRepository(newOwner, newRepo)">
+      URL: <input ng-model="newOwner" required>/<input ng-model="newRepo" required>
       <button type="submit">Reload</button>
     </form>
     <label for="branch">Branch:</label>
     <select ng-model="repository.selectedBranch" ng-options="branch.name for branch in repository.branches"></select>
+    <label for="commit">Commit:</label>
+    <select ng-model="repository.selectedCommit" ng-options="(c.sha.substr(0,6) + ': ' + c.commit.message.substr(0,60)) for c in repository.commits"></select>
 
-    <ul>
-      <li ng-repeat="branch in branches">{{branch | json}}</li>
-    </ul>
     <div ng-show="status == 'loading'">
       Loading...
     </div>
