@@ -7,19 +7,10 @@
   <script src="js/uri-templates.js" defer></script>
   <script src="js/sunburst.js" defer></script>
   <script src="js/github-api.js" defer></script>
-  <script>
-    if(document.location.hash == "#mock") {
-      window.mock = true;
-      document.write('<'+'script src="js/lib/angular-mocks.js" defer><'+'/script>');
-      document.write('<'+'script src="js/mocks.js" defer><'+'/script>');
-    }
-  </script>
   <script src="js/gh-sunburst.js" defer></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
-<script>
-document.write('<body ng-app="gh.sunburst' + (window.mock?'.mock':'') +'">');
-</script>
+<body ng-app="gh.sunburst">
   <div ng-controller="ghSunburstController" class="content ng-cloak">
     <form ng-submit="changeRepository(newOwner, newRepo)">
       URL: <input ng-model="newOwner" required>/<input ng-model="newRepo" required>
