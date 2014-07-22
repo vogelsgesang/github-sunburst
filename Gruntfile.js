@@ -2,7 +2,7 @@ module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     clean: {
-      build: ['build']
+      build: ['build/*']
     },
     copy: {
       build: {
@@ -16,7 +16,8 @@ module.exports = function(grunt) {
       build: {
         options: {
           removeComments: true,
-          collapseWhitespace: true
+          collapseWhitespace: true,
+          conservativeCollapse: true
         },
         files: [
           {expand: true, cwd: 'app', src: ['index.html'], dest: 'build'}
