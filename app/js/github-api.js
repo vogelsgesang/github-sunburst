@@ -1,12 +1,9 @@
-"use strict";
 /**
  * This file contains the "githubApi" module which provides
  * the "githubApi" service.
  */
 (function() {
-  angular.module("githubApi", ["uri-templates"])
-  .service("githubApi", GithubApi);
-
+  "use strict";
   // taken from https://gist.github.com/deiu/9335803
   // parse a Link header
   //
@@ -17,19 +14,19 @@
   function parseLinkHeader(header) {
     // unquote string (utility)
     function unquote(value) {
-      if (value.charAt(0) == '"' && value.charAt(value.length - 1) == '"') return value.substring(1, value.length - 1);
+      if (value.charAt(0) === '"' && value.charAt(value.length - 1) === '"') return value.substring(1, value.length - 1);
       return value;
     }
     var linkexp = /<[^>]*>\s*(\s*;\s*[^\(\)<>@,;:"\/\[\]\?={} \t]+=(([^\(\)<>@,;:"\/\[\]\?={} \t]+)|("[^"]*")))*(,|$)/g;
     var paramexp = /[^\(\)<>@,;:"\/\[\]\?={} \t]+=(([^\(\)<>@,;:"\/\[\]\?={} \t]+)|("[^"]*"))/g;
 
     var matches = header.match(linkexp);
-    var rels = new Object();
+    var rels = {};
     for (var i = 0; i < matches.length; i++) {
       var split = matches[i].split('>');
       var href = split[0].substring(1);
       var ps = split[1];
-      var link = new Object();
+      var link = {};
       link.href = href;
       var s = ps.match(paramexp);
       for (var j = 0; j < s.length; j++) {
@@ -38,18 +35,21 @@
         var name = paramsplit[0];
         link[name] = unquote(paramsplit[1]);
       }
-      if (link.rel != undefined) {
+      if (link.rel !== undefined) {
         rels[link.rel] = link;
       }
     }
     return rels;
   }
 
+  angular.module("githubApi", ["uri-templates"])
+  .service("githubApi", ["$http", "$q", "uriTemplate", GithubApi]);
+
   function GithubApi($http, $q, uriTemplate) {
     //the http headers to sent with every request
     var headers = {
       "Accept": "application/vnd.github.v3+json",
-    }
+    };
     //the url templates
     var urls = {
       userSearch: "https://api.github.com/search/users?q={query}{&page,per_page,sort,order}",
@@ -60,7 +60,7 @@
       listTags: "https://api.github.com/repos/{owner}/{repo}/tags{?page,per_page}",
       listCommits: "https://api.github.com/repos/{owner}/{repo}/commits{?sha,path,author,since,until,page,per_page}",
       tree: "https://api.github.com/repos/{owner}/{repo}/git/trees/{sha}{?recursive}"
-    }
+    };
     //this function send a GET request with the necessary headers and returns the promise
     //after applying decoratePromiseForPagination to it
     function sendGetQuery(url) {
@@ -77,10 +77,10 @@
         if(linkHeader) {
           var links = parseLinkHeader(linkHeader);
           if(links.next) {
-            res.pagination.next = function() {return sendGetQuery(links.next.href);}
+            res.pagination.next = function() {return sendGetQuery(links.next.href);};
           }
           if(links.prev) {
-            res.pagination.prev = function() {return sendGetQuery(links.prev.href);}
+            res.pagination.prev = function() {return sendGetQuery(links.prev.href);};
           }
         }
         return res;
@@ -104,7 +104,7 @@
           params[namedParams[i]] = arguments[i];
         }
         return sendGetQuery(uriTemplate(urls[queryType]).fillFromObject(params));
-      }
+      };
     }
     //create the actual functions used to query the API
     this.searchUser = createQueryFunction("userSearch", ["query"]);
@@ -128,7 +128,7 @@
         .then(function(response) {
           return extractTree(response.tree);
         });
-    } //getCompleteTree
+    }; //getCompleteTree
     //extracts a nice tree structure from the github response
     function extractTree(ghTree) {
       //extracts a subtree from a set of children
@@ -145,7 +145,7 @@
         //(this is the reason for this ternary expression)
         var subtrees = _.groupBy(children, function(child) {
           var i = child.path.indexOf("/");
-          return i < 0 && child.type=="tree" ? child.path : child.path.substr(0, i);
+          return i < 0 && child.type === "tree" ? child.path : child.path.substr(0, i);
         });
         //handle the direct children
         var directChildren = subtrees[""] !== undefined ? subtrees[""] : [];
@@ -157,7 +157,7 @@
         //now, handle the subfolders
         subtrees = _.map(subtrees, function(subtree, pathFragment) {
           //build the subpath
-          var subPath = subtreePath.concat([pathFragment])
+          var subPath = subtreePath.concat([pathFragment]);
           //remove the pathFragment form the path of all children
           _.forEach(subtree, function(c) {
             c.path = c.path.substr(pathFragment.length+1);
@@ -171,8 +171,8 @@
           name: subtreePath[subtreePath.length-1],
           children: subtrees.concat(directChildren)
         });
-      };
+      }
       return extractSubtree(ghTree, []);
     }//extractTree
-  };
+  }
 })();

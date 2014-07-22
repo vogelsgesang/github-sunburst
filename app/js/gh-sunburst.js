@@ -2,10 +2,7 @@
 (function() {
   "use strict";
   angular.module("gh.sunburst", ["d3charts.sunburst", "githubApi"])
-  .config(function(githubApiProvider) {
-    githubApiProvider.userAgent = "vogelsgesang";
-  })
-  .controller("ghSunburstController", function($scope, $q, githubApi) {
+  .controller("ghSunburstController", ["$scope", "$q", "githubApi", function($scope, $q, githubApi) {
     window.scope = $scope;
 
     //loads the basic informations and the branches for a repository
@@ -79,5 +76,5 @@
       }
     });
     $scope.keyFunction = function(d) {return d.path.join("/");};
-  });
+  }]);
 })(); //surrounding IIEF

@@ -7,8 +7,8 @@ module.exports = function(grunt) {
     copy: {
       build: {
         files: [
-          {expand: true, cwd: 'app', src:'js/**', dest: 'build'},
-          {expand: true, cwd: 'app', src:'css/**', dest: 'build'}
+          {expand: true, cwd: 'app', src:'css/**', dest: 'build'},
+          {expand: true, cwd: 'app', src:'js/lib/**', dest: 'build'}
         ]
       }
     },
@@ -18,12 +18,9 @@ module.exports = function(grunt) {
           removeComments: true,
           collapseWhitespace: true
         },
-        files: [{
-          expand: true,
-          cwd: 'app',
-          src: ['index.html'],
-          dest: 'build'
-        }]
+        files: [
+          {expand: true, cwd: 'app', src: ['index.html'], dest: 'build'}
+        ]
       }
     },
     jshint: {
@@ -42,6 +39,13 @@ module.exports = function(grunt) {
           }
         }
       }
+    },
+    uglify: {
+      build: {
+        files: [
+          {expand: true, cwd: 'app', src: ['js/*.js'], dest: 'build'}
+        ]
+      }
     }
   });
 
@@ -49,10 +53,12 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-contrib-htmlmin');
   grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.loadNpmTasks('grunt-contrib-uglify');
 
   grunt.registerTask('default', [
     'clean:build',
     'copy:build',
-    'htmlmin:build'
+    'htmlmin:build',
+    'uglify:build'
   ]);
 };
