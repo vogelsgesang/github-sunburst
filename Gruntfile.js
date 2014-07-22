@@ -1,4 +1,3 @@
-"use strict";
 module.exports = function(grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
@@ -28,7 +27,21 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      all: ["app/js/*.js"]
+      all: {
+        src: ["app/js/*.js"],
+        options: {
+          ignores: ["app/js/uri-templates.js"],
+          strict: true,
+          undef: true,
+          eqeqeq: true,
+          browser: true,
+          globals: {
+            "_": true,
+            "angular": true,
+            "d3": true
+          }
+        }
+      }
     }
   });
 
@@ -38,7 +51,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-jshint');
 
   grunt.registerTask('default', [
-    'jshint',
     'clean:build',
     'copy:build',
     'htmlmin:build'
