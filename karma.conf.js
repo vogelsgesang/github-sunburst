@@ -15,14 +15,14 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-      'js/libs/lodash.min.js',
-      'js/libs/d3.v3.js',
-      'js/libs/angular.min.js',
-      'js/libs/angular-mocks.js',
-      'js/uri-templates.js',
-      'js/sunburst.js',
-      'js/github-api.js',
-      'js/gh-sunburst.js',
+      'app/js/lib/lodash.min.js',
+      'app/js/lib/d3.v3.js',
+      'app/js/lib/angular.min.js',
+      'app/js/lib/angular-mocks.js',
+      'app/js/uri-templates.js',
+      'app/js/sunburst.js',
+      'app/js/github-api.js',
+      'app/js/gh-sunburst.js',
       'test/unit/**Spec.js'
     ],
 
