@@ -1,4 +1,5 @@
 module.exports = function(grunt) {
+  "use strict";
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     clean: {
@@ -36,7 +37,8 @@ module.exports = function(grunt) {
           globals: {
             "_": true,
             "angular": true,
-            "d3": true
+            "d3": true,
+            "console": true
           }
         }
       }
@@ -47,6 +49,14 @@ module.exports = function(grunt) {
           {expand: true, cwd: 'app', src: ['js/*.js'], dest: 'build'}
         ]
       }
+    },
+    githooks: {
+      all: {
+        'pre-commit': 'jshint',
+        options: {
+          template: 'hooks/staged-only.js.hb'
+        }
+      }
     }
   });
 
@@ -55,6 +65,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-htmlmin');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-uglify');
+  grunt.loadNpmTasks('grunt-githooks');
 
   grunt.registerTask('default', [
     'clean:build',
