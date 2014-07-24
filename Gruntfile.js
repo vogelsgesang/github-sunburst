@@ -8,8 +8,7 @@ module.exports = function(grunt) {
     copy: {
       build: {
         files: [
-          {expand: true, cwd: 'app', src:'css/**', dest: 'build'},
-          {expand: true, cwd: 'app', src:'js/lib/**', dest: 'build'}
+          {expand: true, cwd: 'app', src:'css/**', dest: 'build'}
         ]
       }
     },
@@ -46,7 +45,7 @@ module.exports = function(grunt) {
     uglify: {
       build: {
         files: [
-          {expand: true, cwd: 'app', src: ['js/*.js'], dest: 'build'}
+          {expand: true, cwd: 'app', src: ['js/**/*.js'], dest: 'build'}
         ],
         options: {
           sourceMap: true,
