@@ -47,7 +47,11 @@ module.exports = function(grunt) {
       build: {
         files: [
           {expand: true, cwd: 'app', src: ['js/*.js'], dest: 'build'}
-        ]
+        ],
+        options: {
+          sourceMap: true,
+          sourceMapIncludeSources: true
+        }
       }
     },
     githooks: {
